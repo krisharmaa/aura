@@ -14,10 +14,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve your frontend files
+# Mount frontend
 frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
+# ✅ This route MUST be defined BEFORE mounting "/"
 @app.post("/chat")
 async def chat(request: Request):
     data = await request.json()
