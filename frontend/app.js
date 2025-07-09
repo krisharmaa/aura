@@ -17,7 +17,6 @@ async function sendMessage() {
   });
 
   const data = await res.json();
-  console.log(data);
 
   // Show bot response
   chatBox.innerHTML += `<div><strong>Aura:</strong> ${data.response}</div>`;

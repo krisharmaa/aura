@@ -1,14 +1,15 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from backend.chat_logic import query_huggingface 
 
 app = FastAPI()
 
-app.add_middleware (
+app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["*"],
-    allow_credentials = True,
-    allow_methods = ["*"],
-    allow_headers = ["*"],
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -20,5 +21,6 @@ async def chat(request: Request):
     data = await request.json()
     user_input = data.get("message", "")
 
-    response = f"Aura says: '{user_input}' - nice message!"
+    response = query_huggingface(user_input)
+
     return {"response": response}
