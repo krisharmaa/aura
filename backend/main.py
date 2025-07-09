@@ -1,31 +1,26 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from backend.chat_logic import query_huggingface
+import os
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to your frontend origin
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Aura backend live"}
+# Serve your frontend files
+frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
 @app.post("/chat")
 async def chat(request: Request):
-    try:
-        data = await request.json()
-        user_input = data.get("message", "")
-        if not user_input:
-            return {"response": "Please enter a message."}
-
-        response = query_huggingface(user_input)
-        return {"response": response}
-    except Exception as e:
-        print("Error in /chat endpoint:", e)
-        return {"response": "Internal server error. Please try again later."}
+    data = await request.json()
+    user_input = data.get("message", "")
+    response = query_huggingface(user_input)
+    return {"response": response}

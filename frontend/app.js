@@ -46,7 +46,7 @@ function appendMessage(label, text, className) {
 // Fetch AI response from the backend
 async function fetchAuraResponse(prompt) {
   try {
-    const res = await fetch("http://localhost:8000/chat", {
+    const res = await fetch("/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
