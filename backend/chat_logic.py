@@ -7,17 +7,33 @@ load_dotenv()
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 headers = {
-    "Authorization": f"Bearer {os.getenv('HF_API_KEY')}",  # Use your OpenRouter key here
+    "Authorization": f"Bearer {os.getenv('HF_API_KEY')}",  # Your OpenRouter key in .env
     "Content-Type": "application/json"
 }
 
+# Persistent conversation history
+conversation_history = [
+    {
+        "role": "system",
+        "content": (
+            "You are Aura, a warm, supportive, and natural-sounding AI tutor. "
+            "You help users learn through friendly, human-like conversations. "
+            "Be expressive, kind, and adjust tone based on the user's style. "
+            "Use emojis sparingly, and keep explanations concise and engaging."
+        )
+    }
+]
+
 def query_huggingface(prompt: str) -> str:
+    # Add the user's message to the conversation
+    conversation_history.append({
+        "role": "user",
+        "content": prompt
+    })
+
     payload = {
         "model": "gryphe/mythomax-l2-13b",
-        "messages": [
-            {"role": "system", "content": "You are Aura, a concise, helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
+        "messages": conversation_history
     }
 
     try:
@@ -28,7 +44,16 @@ def query_huggingface(prompt: str) -> str:
         response.raise_for_status()
         result = response.json()
 
-        return result["choices"][0]["message"]["content"]
+        # Get the reply from the response
+        reply = result["choices"][0]["message"]["content"].strip()
+
+        # Add assistant's reply to history
+        conversation_history.append({
+            "role": "assistant",
+            "content": reply
+        })
+
+        return reply
     except Exception as e:
         print("Error querying OpenRouter:", e)
-        return "Hmm... I'm having trouble thinking right now."
+        return "Sorry, I couldn't respond right now. Please try again soon."
